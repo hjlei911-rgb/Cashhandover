@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="現金交接">
+<title>店面現金交接系統</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+:root {
+  --color-background-primary: #ffffff;
+  --color-background-secondary: #f2f2f7;
+  --color-background-tertiary: #e5e5ea;
+  --color-background-info: #e8f0fb;
+  --color-border-primary: #c6c6c8;
+  --color-border-secondary: #d1d1d6;
+  --color-border-tertiary: #e5e5ea;
+  --color-border-info: #b0c8f0;
+  --color-text-primary: #1c1c1e;
+  --color-text-secondary: #6c6c70;
+  --color-text-tertiary: #aeaeb2;
+  --color-text-info: #1a56db;
+  --font-sans: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "PingFang TC", "Microsoft JhengHei", sans-serif;
+  --font-mono: "SF Mono", Menlo, monospace;
+  --border-radius-sm: 6px;
+  --border-radius-md: 10px;
+  --border-radius-lg: 14px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; }
+body {
+  font-family: var(--font-sans);
+  background: var(--color-background-tertiary);
+  max-width: 600px;
+  margin: 0 auto;
+  -webkit-text-size-adjust: 100%;
+}
+.app { min-height: 100vh; display: flex; flex-direction: column; }
+.tab-bar {
+  display: flex;
+  background: var(--color-background-primary);
+  border-bottom: 0.5px solid var(--color-border-tertiary);
+  position: sticky; top: 0; z-index: 10;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+.tab-btn {
+  flex: 1; padding: 12px 4px;
+  font-size: 12px; font-weight: 500;
+  color: var(--color-text-secondary);
+  background: none; border: none; cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all .2s;
+  font-family: var(--font-sans);
+}
+.tab-btn.active { color: #185FA5; border-bottom-color: #185FA5; }
+.tab-btn i { font-size: 18px; display: block; margin: 0 auto 2px; }
+.page { display: none; flex-direction: column; gap: 12px; padding: 16px; }
+.page.active { display: flex; }
+.card {
+  background: var(--color-background-primary);
+  border: 0.5px solid var(--color-border-tertiary);
+  border-radius: var(--border-radius-lg);
+  padding: 16px;
+}
+.card-title {
+  font-size: 13px; font-weight: 500;
+  color: var(--color-text-secondary);
+  margin-bottom: 12px;
+  display: flex; align-items: center; gap: 6px;
+}
+label {
+  font-size: 13px; color: var(--color-text-secondary);
+  display: block; margin-bottom: 4px; margin-top: 10px;
+}
+label:first-of-type { margin-top: 0; }
+input, select, textarea {
+  width: 100%; font-size: 16px;
+  padding: 11px 12px;
+  border: 0.5px solid var(--color-border-secondary);
+  border-radius: var(--border-radius-md);
+  background: var(--color-background-primary);
+  color: var(--color-text-primary);
+  font-family: var(--font-sans);
+  -webkit-appearance: none;
+  appearance: none;
+}
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: #185FA5;
+  box-shadow: 0 0 0 3px rgba(24,95,165,0.12);
+}
+textarea { resize: vertical; min-height: 72px; }
+.btn-primary {
+  width: 100%; padding: 14px;
+  background: #185FA5; color: #fff;
+  border: none; border-radius: var(--border-radius-md);
+  font-size: 16px; font-weight: 500;
+  cursor: pointer; margin-top: 12px;
+  font-family: var(--font-sans);
+  -webkit-appearance: none;
+}
+.btn-primary:active { opacity: .85; transform: scale(.99); }
+.btn-secondary {
+  padding: 10px 14px; background: none;
+  border: 0.5px solid var(--color-border-secondary);
+  border-radius: var(--border-radius-md);
+  font-size: 14px; color: var(--color-text-primary);
+  cursor: pointer; font-family: var(--font-sans);
+}
+.btn-success {
+  width: 100%; padding: 14px;
+  background: #3B6D11; color: #fff;
+  border: none; border-radius: var(--border-radius-md);
+  font-size: 16px; font-weight: 500;
+  cursor: pointer; margin-top: 8px;
+  font-family: var(--font-sans);
+}
+.seg {
+  display: flex;
+  background: var(--color-background-secondary);
+  border-radius: var(--border-radius-md);
+  padding: 3px; gap: 3px;
+}
+.seg-btn {
+  flex: 1; padding: 9px 4px; font-size: 14px;
+  border: none; background: none;
+  border-radius: 8px; cursor: pointer;
+  color: var(--color-text-secondary); font-weight: 500;
+  font-family: var(--font-sans);
+}
+.seg-btn.active {
+  background: var(--color-background-primary);
+  color: var(--color-text-primary);
+  box-shadow: 0 1px 3px rgba(0,0,0,.10);
+}
+.entry-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 11px 0;
+  border-bottom: 0.5px solid var(--color-border-tertiary);
+}
+.entry-row:last-child { border-bottom: none; }
+.badge {
+  display: inline-block; font-size: 11px;
+  padding: 3px 8px; border-radius: 20px;
+  font-weight: 500; white-space: nowrap;
+}
+.badge-in { background: #EAF3DE; color: #27500A; }
+.badge-out-貨款 { background: #FDE8D8; color: #7A2E0A; }
+.badge-out-雜支 { background: #FCEBEB; color: #791F1F; }
+.badge-out-其他 { background: #F0EBF8; color: #4A1D7A; }
+.stat-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 9px 0;
+  border-bottom: 0.5px solid var(--color-border-tertiary);
+}
+.stat-row:last-child { border-bottom: none; }
+.coin-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 10px; }
+.coin-item { display: flex; flex-direction: column; gap: 4px; }
+.coin-item input { text-align: right; }
+.total-box {
+  background: var(--color-background-info);
+  border: 0.5px solid var(--color-border-info);
+  border-radius: var(--border-radius-md);
+  padding: 16px; text-align: center; margin-top: 10px;
+}
+.total-label { font-size: 12px; color: var(--color-text-info); margin-bottom: 4px; }
+.total-val { font-size: 28px; font-weight: 500; color: #0C447C; }
+.warn-box {
+  background: #FAEEDA; border: 0.5px solid #EF9F27;
+  border-radius: var(--border-radius-md); padding: 14px; margin-top: 10px;
+}
+.err-box {
+  background: #FCEBEB; border: 0.5px solid #E24B4A;
+  border-radius: var(--border-radius-md); padding: 14px; margin-top: 10px;
+}
+.special-box {
+  background: #EAF3DE; border: 0.5px solid #639922;
+  border-radius: var(--border-radius-md); padding: 14px;
+}
+.gate-pill {
+  display: inline-block; background: #E6F1FB; color: #0C447C;
+  font-size: 12px; padding: 4px 10px;
+  border-radius: 20px; font-weight: 500; margin-bottom: 8px;
+}
+.net-row { display: flex; justify-content: space-between; padding: 6px 0; }
+.net-label { font-size: 14px; color: var(--color-text-secondary); }
+.net-val { font-size: 14px; font-weight: 500; }
+.net-val.pos { color: #27500A; }
+.net-val.neg { color: #791F1F; }
+.empty-state {
+  text-align: center; padding: 36px 16px;
+  color: var(--color-text-tertiary); font-size: 14px;
+}
+.confirm-box {
+  background: #F1EFE8; border: 0.5px solid #B4B2A9;
+  border-radius: var(--border-radius-md);
+  padding: 14px; margin-top: 10px; text-align: center;
+}
+.base-display {
+  font-size: 22px; font-weight: 500; color: #0C447C;
+  background: #E6F1FB; border-radius: var(--border-radius-md);
+  padding: 12px 16px; text-align: center; margin: 8px 0;
+}
+.cat-row { display: flex; gap: 8px; margin-top: 8px; }
+.cat-btn {
+  flex: 1; padding: 10px 4px; font-size: 14px;
+  border: 0.5px solid var(--color-border-secondary);
+  background: none; border-radius: var(--border-radius-md);
+  cursor: pointer; color: var(--color-text-secondary);
+  font-weight: 500; font-family: var(--font-sans);
+  transition: all .15s;
+}
+.cat-btn.active-貨款 { background: #FDE8D8; border-color: #C05620; color: #7A2E0A; }
+.cat-btn.active-雜支 { background: #FCEBEB; border-color: #E24B4A; color: #791F1F; }
+.cat-btn.active-其他 { background: #F0EBF8; border-color: #9B6DC5; color: #4A1D7A; }
+.info-banner {
+  background: #E6F1FB; border-radius: var(--border-radius-md);
+  padding: 10px 12px; margin-top: 10px;
+  font-size: 13px; color: #0C447C;
+  display: flex; align-items: center; gap: 8px;
+}
+</style>
+</head>
+<body>
+<div class="app">
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="switchTab('ledger')">
+    <i class="ti ti-list"></i>收支流水帳
+  </button>
+  <button class="tab-btn" onclick="switchTab('handover')">
+    <i class="ti ti-arrows-exchange"></i>班別交接
+  </button>
+  <button class="tab-btn" onclick="switchTab('settings')">
+    <i class="ti ti-settings"></i>店長設定
+  </button>
+</div>
+
+<!-- 收支流水帳 -->
+<div id="page-ledger" class="page active">
+  <div class="card">
+    <div class="card-title"><i class="ti ti-plus-circle"></i>新增收支紀錄</div>
+    <div class="seg">
+      <button class="seg-btn active" onclick="setType('in',this)">收入</button>
+      <button class="seg-btn" onclick="setType('out',this)">支出</button>
+    </div>
+    <div id="cat-section" style="display:none">
+      <label>支出類別</label>
+      <div class="cat-row">
+        <button class="cat-btn" id="cat-貨款" onclick="setCat('貨款')">貨款</button>
+        <button class="cat-btn" id="cat-雜支" onclick="setCat('雜支')">雜支</button>
+        <button class="cat-btn" id="cat-其他" onclick="setCat('其他')">其他</button>
+      </div>
+    </div>
+    <label>項目名稱</label>
+    <input type="text" id="l-name" placeholder="例：飲料銷售、補貨費用…">
+    <label>金額（元）</label>
+    <input type="number" id="l-amount" placeholder="0" inputmode="numeric">
+    <label>經手人員</label>
+    <input type="text" id="l-person" placeholder="姓名或工號">
+    <button class="btn-primary" onclick="addEntry()"><i class="ti ti-check"></i> 確認新增</button>
+  </div>
+
+  <div class="card" id="summary-card" style="display:none">
+    <div class="card-title"><i class="ti ti-calculator"></i>今日小計</div>
+    <div class="stat-row">
+      <span style="font-size:14px;color:var(--color-text-secondary)">今日底金（起始）</span>
+      <span style="font-size:15px;font-weight:500;color:#0C447C" id="sum-base">$0</span>
+    </div>
+    <div class="stat-row">
+      <span style="font-size:14px;color:var(--color-text-secondary)">總收入</span>
+      <span style="font-size:15px;font-weight:500;color:#27500A" id="sum-in">$0</span>
+    </div>
+    <div class="stat-row">
+      <span style="font-size:14px;color:var(--color-text-secondary)">支出－貨款</span>
+      <span style="font-size:15px;font-weight:500;color:#7A2E0A" id="sum-貨款">$0</span>
+    </div>
+    <div class="stat-row">
+      <span style="font-size:14px;color:var(--color-text-secondary)">支出－雜支</span>
+      <span style="font-size:15px;font-weight:500;color:#791F1F" id="sum-雜支">$0</span>
+    </div>
+    <div class="stat-row">
+      <span style="font-size:14px;color:var(--color-text-secondary)">支出－其他</span>
+      <span style="font-size:15px;font-weight:500;color:#4A1D7A" id="sum-其他">$0</span>
+    </div>
+    <div class="stat-row">
+      <span style="font-size:14px;color:var(--color-text-secondary)">總支出</span>
+      <span style="font-size:15px;font-weight:500;color:#791F1F" id="sum-out">$0</span>
+    </div>
+    <div class="stat-row">
+      <span style="font-size:14px;color:var(--color-text-secondary)">淨額</span>
+      <span style="font-size:15px;font-weight:500" id="sum-net">$0</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title" style="justify-content:space-between">
+      <span><i class="ti ti-history"></i> 今日紀錄</span>
+      <span id="entry-count" style="font-size:12px;color:var(--color-text-tertiary)"></span>
+    </div>
+    <div id="entry-list">
+      <div class="empty-state">
+        <i class="ti ti-notes" style="font-size:36px;display:block;margin:0 auto 8px"></i>
+        尚無紀錄，請新增第一筆
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 班別交接 -->
+<div id="page-handover" class="page">
+  <div class="card">
+    <div class="card-title"><i class="ti ti-arrows-exchange"></i>當前交接關卡</div>
+    <div id="gate-display"></div>
+    <div style="display:flex;gap:8px;margin-top:12px">
+      <button class="btn-secondary" onclick="prevGate()" style="flex:1"><i class="ti ti-arrow-left"></i> 上一關</button>
+      <button class="btn-secondary" onclick="nextGate()" style="flex:1">下一關 <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <div class="card" id="special-g5" style="display:none">
+    <div class="special-box">
+      <div style="font-size:15px;font-weight:500;color:#27500A;margin-bottom:6px;display:flex;align-items:center;gap:6px">
+        <i class="ti ti-users" style="font-size:20px"></i>雙人確認提醒
+      </div>
+      <div style="font-size:14px;color:#3B6D11">
+        此關卡需要<strong>早班與午班兩人同時在場</strong>，共同完成點現確認。
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><i class="ti ti-coins"></i>現金清點計算機</div>
+    <div class="coin-grid">
+      <div class="coin-item"><label>$1,000 × 張</label><input type="number" id="c1000" value="0" min="0" inputmode="numeric" oninput="calcCash()"></div>
+      <div class="coin-item"><label>$500 × 張</label><input type="number" id="c500" value="0" min="0" inputmode="numeric" oninput="calcCash()"></div>
+      <div class="coin-item"><label>$100 × 張</label><input type="number" id="c100" value="0" min="0" inputmode="numeric" oninput="calcCash()"></div>
+      <div class="coin-item"><label>$50 × 枚</label><input type="number" id="c50" value="0" min="0" inputmode="numeric" oninput="calcCash()"></div>
+      <div class="coin-item"><label>$10 × 枚</label><input type="number" id="c10" value="0" min="0" inputmode="numeric" oninput="calcCash()"></div>
+      <div class="coin-item"><label>$5 × 枚</label><input type="number" id="c5" value="0" min="0" inputmode="numeric" oninput="calcCash()"></div>
+      <div class="coin-item"><label>$1 × 枚</label><input type="number" id="c1" value="0" min="0" inputmode="numeric" oninput="calcCash()"></div>
+    </div>
+    <div class="total-box">
+      <div class="total-label">實際清點現金總額</div>
+      <div class="total-val" id="cash-total">$0</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><i class="ti ti-scale"></i>系統核對</div>
+    <div class="net-row"><span class="net-label">上關留存金額（底金）</span><span class="net-val" id="sc-prev">$0</span></div>
+    <div class="net-row"><span class="net-label">期間收入合計</span><span class="net-val pos" id="sc-in">+$0</span></div>
+    <div class="net-row"><span class="net-label">期間支出合計</span><span class="net-val neg" id="sc-out">-$0</span></div>
+    <div style="border-top:0.5px solid var(--color-border-tertiary);margin:8px 0"></div>
+    <div class="net-row">
+      <span class="net-label" style="font-weight:500">系統應有現金</span>
+      <span class="net-val" id="sc-expected" style="font-size:17px">$0</span>
+    </div>
+    <div id="diff-section"></div>
+
+    <div id="g6-extra" style="display:none">
+      <div style="border-top:0.5px solid var(--color-border-tertiary);margin:14px 0"></div>
+      <div class="card-title"><i class="ti ti-safe"></i>關卡 6 專用欄位</div>
+      <label>店長收掉現金金額（元）</label>
+      <input type="number" id="g6-collect" placeholder="0" inputmode="numeric">
+      <label>新投入收銀機底金（明天用）（元）</label>
+      <input type="number" id="g6-base" placeholder="0" inputmode="numeric" oninput="calcG6()">
+      <div id="g6-result" class="confirm-box" style="display:none">
+        <div style="font-size:12px;color:#5F5E5A;margin-bottom:4px">明日底金將設為</div>
+        <div style="font-size:16px;font-weight:500" id="g6-base-val">$0</div>
+      </div>
+      <div class="info-banner">
+        <i class="ti ti-file-download" style="font-size:20px;flex-shrink:0"></i>
+        完成關卡 6 後將<strong style="margin-left:2px">自動匯出今日完整日報 CSV</strong>
+      </div>
+    </div>
+
+    <div id="diff-note" style="display:none">
+      <label style="margin-top:14px">差額原因備註 <span style="color:#E24B4A">（必填）</span></label>
+      <textarea id="diff-reason" placeholder="請說明差額原因…"></textarea>
+    </div>
+    <label style="margin-top:14px">交接人員姓名</label>
+    <input type="text" id="h-person" placeholder="姓名或工號">
+    <button class="btn-primary" onclick="confirmHandover()"><i class="ti ti-check"></i> 確認完成交接</button>
+  </div>
+
+  <div class="card" id="handover-history-card" style="display:none">
+    <div class="card-title" style="justify-content:space-between">
+      <span><i class="ti ti-clock-history"></i> 今日交接紀錄</span>
+      <span id="hh-count" style="font-size:12px;color:var(--color-text-tertiary)"></span>
+    </div>
+    <div id="handover-history"></div>
+  </div>
+</div>
+
+<!-- 店長設定 -->
+<div id="page-settings" class="page">
+  <div class="card">
+    <div class="card-title"><i class="ti ti-safe"></i>收銀機底金設定</div>
+    <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:8px">店長可隨時調整底金，作為系統核對的起始基準。</div>
+    <div class="base-display" id="base-display">$2,000</div>
+    <label>調整底金金額（元）</label>
+    <input type="number" id="new-base" placeholder="請輸入新底金" inputmode="numeric">
+    <label>調整原因</label>
+    <input type="text" id="base-reason" placeholder="例：重新盤點、開店初始設定…">
+    <label>店長姓名</label>
+    <input type="text" id="base-person" placeholder="請輸入店長姓名">
+    <button class="btn-primary" onclick="saveBase()"><i class="ti ti-device-floppy"></i> 儲存底金設定</button>
+  </div>
+
+  <div class="card" id="base-log-card" style="display:none">
+    <div class="card-title"><i class="ti ti-history"></i>底金調整紀錄</div>
+    <div id="base-log"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><i class="ti ti-download"></i>手動匯出</div>
+    <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:8px">
+      完成關卡 6 時會<strong>自動匯出</strong>。若需手動匯出可在此操作。
+    </div>
+    <label style="margin-top:0">標記日期</label>
+    <input type="date" id="export-date">
+    <button class="btn-success" onclick="exportDaily(false)">
+      <i class="ti ti-file-spreadsheet"></i> 手動匯出今日日報 CSV
+    </button>
+  </div>
+</div>
+</div>
+
+<script>
+var currentType = 'in';
+var currentCat = '';
+var allEntries = [];
+var currentEntries = [];
+var currentGate = 0;
+var prevBalance = 2000;
+var initialBalance = 2000;
+var handoverHistory = [];
+var baseLog = [];
+
+var GATES = [
+  {num:1, label:'店長與晚班交接', desc:'晚班上班確認店長放的底金'},
+  {num:2, label:'晚班下班', desc:'結算當晚收支與交接金額'},
+  {num:3, label:'隔天早班上班', desc:'確認收銀機現金與昨晚相符'},
+  {num:4, label:'午班上班', desc:'確認早上現金與早班收支'},
+  {num:5, label:'早班下班', desc:'【雙人確認】早班與午班共同點現確認'},
+  {num:6, label:'店長晚上結帳', desc:'收掉現金，並輸入新投入的底金'},
+];
+
+var today = new Date();
+document.getElementById('export-date').value = today.toISOString().slice(0,10);
+
+function switchTab(t) {
+  var tabs = ['ledger','handover','settings'];
+  document.querySelectorAll('.tab-btn').forEach(function(b,i){ b.classList.toggle('active', tabs[i]===t); });
+  document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
+  document.getElementById('page-'+t).classList.add('active');
+  if(t==='handover') renderGate();
+}
+
+function setType(t, el) {
+  currentType = t;
+  currentCat = '';
+  document.querySelectorAll('.seg-btn').forEach(function(b){ b.classList.remove('active'); });
+  el.classList.add('active');
+  document.getElementById('cat-section').style.display = t==='out' ? '' : 'none';
+  ['貨款','雜支','其他'].forEach(function(c){
+    document.getElementById('cat-'+c).className = 'cat-btn';
+  });
+}
+
+function setCat(cat) {
+  currentCat = cat;
+  ['貨款','雜支','其他'].forEach(function(c){
+    document.getElementById('cat-'+c).className = 'cat-btn' + (c===cat ? ' active-'+c : '');
+  });
+}
+
+function fmt(n) { return '$' + Number(n).toLocaleString('zh-TW'); }
+
+function nowStr() {
+  var d = new Date();
+  return (d.getMonth()+1) + '/' + d.getDate() + ' ' +
+    String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+}
+
+function addEntry() {
+  var name = document.getElementById('l-name').value.trim();
+  var amt = parseInt(document.getElementById('l-amount').value) || 0;
+  var person = document.getElementById('l-person').value.trim();
+  if(!name){ alert('請輸入項目名稱'); return; }
+  if(!amt){ alert('請輸入金額'); return; }
+  if(!person){ alert('請輸入經手人員'); return; }
+  if(currentType==='out' && !currentCat){ alert('請選擇支出類別'); return; }
+  var entry = {type:currentType, cat:currentType==='out'?currentCat:'', name:name, amt:amt, person:person, time:nowStr()};
+  allEntries.push(entry);
+  currentEntries.push(entry);
+  document.getElementById('l-name').value = '';
+  document.getElementById('l-amount').value = '';
+  renderEntries();
+  updateSystemCalc();
+}
+
+function getAllNet() {
+  var inSum=0, outSum=0, g1=0, g2=0, g3=0;
+  allEntries.forEach(function(e){
+    if(e.type==='in') inSum+=e.amt;
+    else { outSum+=e.amt; if(e.cat==='貨款') g1+=e.amt; else if(e.cat==='雜支') g2+=e.amt; else g3+=e.amt; }
+  });
+  return {inSum:inSum, outSum:outSum, 貨款:g1, 雜支:g2, 其他:g3};
+}
+
+function getCurrentNet() {
+  var inSum=0, outSum=0;
+  currentEntries.forEach(function(e){ e.type==='in' ? inSum+=e.amt : outSum+=e.amt; });
+  return {inSum:inSum, outSum:outSum, net:inSum-outSum};
+}
+
+function badgeClass(e) {
+  if(e.type==='in') return 'badge-in';
+  return 'badge-out-' + (e.cat||'其他');
+}
+function badgeLabel(e) {
+  if(e.type==='in') return '收入';
+  return '支出・' + e.cat;
+}
+
+function renderEntries() {
+  var list = document.getElementById('entry-list');
+  var cnt = document.getElementById('entry-count');
+  document.getElementById('sum-base').textContent = fmt(initialBalance);
+  document.getElementById('summary-card').style.display = allEntries.length ? '' : 'none';
+  if(!allEntries.length){
+    list.innerHTML = '<div class="empty-state"><i class="ti ti-notes" style="font-size:36px;display:block;margin:0 auto 8px"></i>尚無紀錄</div>';
+    cnt.textContent = ''; return;
+  }
+  cnt.textContent = allEntries.length + '筆';
+  var n = getAllNet();
+  document.getElementById('sum-in').textContent = fmt(n.inSum);
+  document.getElementById('sum-out').textContent = fmt(n.outSum);
+  document.getElementById('sum-貨款').textContent = fmt(n.貨款);
+  document.getElementById('sum-雜支').textContent = fmt(n.雜支);
+  document.getElementById('sum-其他').textContent = fmt(n.其他);
+  var net = n.inSum - n.outSum;
+  var el = document.getElementById('sum-net');
+  el.textContent = (net>=0?'+':'') + fmt(net);
+  el.style.color = net>=0 ? '#27500A' : '#791F1F';
+  list.innerHTML = allEntries.slice().reverse().map(function(e){
+    return '<div class="entry-row">' +
+      '<div style="flex:1;min-width:0">' +
+        '<div style="font-size:15px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + e.name + '</div>' +
+        '<div style="font-size:12px;color:var(--color-text-tertiary);margin-top:2px">' + e.time + ' · ' + e.person + '</div>' +
+      '</div>' +
+      '<span class="badge ' + badgeClass(e) + '">' + badgeLabel(e) + '</span>' +
+      '<span style="font-size:15px;font-weight:500;color:' + (e.type==='in'?'#27500A':'#791F1F') + ';min-width:64px;text-align:right">' +
+        (e.type==='in'?'+':'-') + fmt(e.amt) +
+      '</span></div>';
+  }).join('');
+}
+
+function renderGate() {
+  var g = GATES[currentGate];
+  document.getElementById('gate-display').innerHTML =
+    '<div class="gate-pill">關卡 ' + g.num + ' / 6</div>' +
+    '<div style="font-size:18px;font-weight:500;margin:6px 0 4px">' + g.label + '</div>' +
+    '<div style="font-size:14px;color:var(--color-text-secondary)">' + g.desc + '</div>';
+  document.getElementById('special-g5').style.display = currentGate===4 ? '' : 'none';
+  document.getElementById('g6-extra').style.display = currentGate===5 ? '' : 'none';
+  updateSystemCalc();
+}
+
+function prevGate(){ if(currentGate>0){ currentGate--; renderGate(); resetCash(); } }
+function nextGate(){ if(currentGate<5){ currentGate++; renderGate(); resetCash(); } }
+
+function resetCash() {
+  ['c1000','c500','c100','c50','c10','c5','c1'].forEach(function(id){ document.getElementById(id).value=0; });
+  document.getElementById('cash-total').textContent = '$0';
+  document.getElementById('diff-section').innerHTML = '';
+  document.getElementById('diff-note').style.display = 'none';
+}
+
+function calcCash() {
+  var vals = {c1000:1000,c500:500,c100:100,c50:50,c10:10,c5:5,c1:1};
+  var total = 0;
+  Object.keys(vals).forEach(function(id){ total += (parseInt(document.getElementById(id).value)||0) * vals[id]; });
+  document.getElementById('cash-total').textContent = fmt(total);
+  updateDiff(total);
+}
+
+function updateSystemCalc() {
+  var n = getCurrentNet();
+  var expected = prevBalance + n.net;
+  document.getElementById('sc-prev').textContent = fmt(prevBalance);
+  document.getElementById('sc-in').textContent = '+' + fmt(n.inSum);
+  document.getElementById('sc-out').textContent = '-' + fmt(n.outSum);
+  document.getElementById('sc-expected').textContent = fmt(expected);
+}
+
+function updateDiff(actual) {
+  var n = getCurrentNet();
+  var expected = prevBalance + n.net;
+  var diff = actual - expected;
+  var sec = document.getElementById('diff-section');
+  var note = document.getElementById('diff-note');
+  if(diff===0){
+    sec.innerHTML = '<div style="background:#EAF3DE;border:0.5px solid #639922;border-radius:var(--border-radius-md);padding:12px;margin-top:10px;text-align:center;font-size:14px;color:#27500A"><i class="ti ti-circle-check" style="font-size:20px;vertical-align:-4px;margin-right:6px"></i>現金完全相符，無差異</div>';
+    note.style.display = 'none';
+  } else {
+    var surplus = diff > 0;
+    sec.innerHTML = '<div class="' + (surplus?'warn-box':'err-box') + '">' +
+      '<div style="font-size:14px;font-weight:500;color:' + (surplus?'#633806':'#791F1F') + ';margin-bottom:6px;display:flex;align-items:center;gap:6px">' +
+        '<i class="ti ti-alert-triangle" style="font-size:20px"></i>' + (surplus?'⚠ 盤盈警告':'⚠ 盤損警告') +
+      '</div>' +
+      '<div style="font-size:14px;color:' + (surplus?'#854F0B':'#A32D2D') + '">實際現金' + (surplus?'多出':'少了') +
+        ' <strong>' + fmt(Math.abs(diff)) + '</strong>，與系統應有金額不符，請填寫差額原因。</div>' +
+    '</div>';
+    note.style.display = '';
+  }
+}
+
+function calcG6() {
+  var base = parseInt(document.getElementById('g6-base').value) || 0;
+  var res = document.getElementById('g6-result');
+  if(base>0){ res.style.display=''; document.getElementById('g6-base-val').textContent=fmt(base); }
+  else res.style.display = 'none';
+}
+
+function confirmHandover() {
+  var person = document.getElementById('h-person').value.trim();
+  if(!person){ alert('請輸入交接人員姓名'); return; }
+  if(document.getElementById('diff-note').style.display!=='none' && !document.getElementById('diff-reason').value.trim()){
+    alert('現金有差額，請填寫差額原因備註'); return;
+  }
+  var g = GATES[currentGate];
+  var cashTotal = document.getElementById('cash-total').textContent;
+  var expected = document.getElementById('sc-expected').textContent;
+  var note = document.getElementById('diff-reason').value.trim();
+  handoverHistory.unshift({gate:g.num, label:g.label, person:person, cashTotal:cashTotal, expected:expected, time:nowStr(), note:note});
+  var actual = parseInt(cashTotal.replace(/[$,$,]/g,'')) || 0;
+  var isGate6 = currentGate === 5;
+  var newBase = isGate6 ? (parseInt(document.getElementById('g6-base').value)||actual) : actual;
+  prevBalance = newBase;
+  document.getElementById('base-display').textContent = fmt(prevBalance);
+  currentEntries = [];
+  renderEntries(); renderHandoverHistory(); resetCash(); updateSystemCalc();
+  if(isGate6){
+    alert('關卡 6 完成！即將自動匯出今日日報 CSV…');
+    exportDaily(true);
+    setTimeout(function(){
+      initialBalance = newBase;
+      allEntries = []; currentEntries = []; handoverHistory = [];
+      currentGate = 0;
+      renderGate(); renderEntries(); updateSystemCalc(); renderHandoverHistory();
+    }, 600);
+  } else {
+    alert('關卡 ' + g.num + ' 交接完成！');
+    currentGate++;
+    renderGate();
+  }
+  document.getElementById('h-person').value = '';
+  document.getElementById('diff-reason').value = '';
+}
+
+function renderHandoverHistory() {
+  var card = document.getElementById('handover-history-card');
+  var list = document.getElementById('handover-history');
+  var cnt = document.getElementById('hh-count');
+  if(!handoverHistory.length){ card.style.display='none'; return; }
+  card.style.display = '';
+  cnt.textContent = handoverHistory.length + '筆';
+  list.innerHTML = handoverHistory.map(function(h){
+    return '<div style="padding:11px 0;border-bottom:0.5px solid var(--color-border-tertiary)">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">' +
+        '<span style="font-size:12px;background:#E6F1FB;color:#0C447C;padding:2px 8px;border-radius:20px;font-weight:500">關卡' + h.gate + '</span>' +
+        '<span style="font-size:12px;color:var(--color-text-tertiary)">' + h.time + '</span>' +
+      '</div>' +
+      '<div style="font-size:15px;font-weight:500">' + h.label + '</div>' +
+      '<div style="font-size:12px;color:var(--color-text-secondary);margin-top:2px">經手：' + h.person + ' · 清點：' + h.cashTotal + ' · 應有：' + h.expected + '</div>' +
+      (h.note ? '<div style="font-size:12px;color:#854F0B;margin-top:4px;background:#FAEEDA;padding:4px 8px;border-radius:6px">備註：' + h.note + '</div>' : '') +
+    '</div>';
+  }).join('');
+}
+
+function saveBase() {
+  var val = parseInt(document.getElementById('new-base').value) || 0;
+  var reason = document.getElementById('base-reason').value.trim();
+  var person = document.getElementById('base-person').value.trim();
+  if(!val){ alert('請輸入底金金額'); return; }
+  if(!person){ alert('請輸入店長姓名'); return; }
+  prevBalance = val; initialBalance = val;
+  document.getElementById('base-display').textContent = fmt(val);
+  document.getElementById('sum-base').textContent = fmt(val);
+  baseLog.unshift({val:val, reason:reason||'店長手動調整', person:person, time:nowStr()});
+  renderBaseLog(); updateSystemCalc();
+  document.getElementById('new-base').value = '';
+  document.getElementById('base-reason').value = '';
+  document.getElementById('base-person').value = '';
+  alert('底金已更新為 ' + fmt(val));
+}
+
+function renderBaseLog() {
+  var card = document.getElementById('base-log-card');
+  var log = document.getElementById('base-log');
+  if(!baseLog.length){ card.style.display='none'; return; }
+  card.style.display = '';
+  log.innerHTML = baseLog.map(function(b){
+    return '<div style="padding:10px 0;border-bottom:0.5px solid var(--color-border-tertiary)">' +
+      '<div style="display:flex;justify-content:space-between">' +
+        '<span style="font-size:16px;font-weight:500;color:#0C447C">' + fmt(b.val) + '</span>' +
+        '<span style="font-size:12px;color:var(--color-text-tertiary)">' + b.time + '</span>' +
+      '</div>' +
+      '<div style="font-size:12px;color:var(--color-text-secondary);margin-top:2px">' + b.person + ' · ' + b.reason + '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function csvEsc(v) { return '"' + String(v===undefined||v===null?'':v).replace(/"/g,'""') + '"'; }
+function csvRow(arr) { return arr.map(csvEsc).join(','); }
+
+function exportDaily(auto) {
+  var dateVal = document.getElementById('export-date').value || today.toISOString().slice(0,10);
+  var lines = [];
+  lines.push(csvRow(['店面現金日報','日期：'+dateVal,'','','','','']));
+  lines.push(csvRow(['','','','','','','']));
+
+  lines.push(csvRow(['【當日底金】','','','','','','']));
+  lines.push(csvRow(['項目','金額','說明','','','','']));
+  lines.push(csvRow(['當日起始底金', initialBalance, '收銀機放置金額','','','','']));
+  if(baseLog.length) baseLog.forEach(function(b){
+    lines.push(csvRow(['底金調整', b.val, b.reason+' ('+b.person+' '+b.time+')','','','','']));
+  });
+  lines.push(csvRow(['','','','','','','']));
+
+  lines.push(csvRow(['【收支細項】','','','','','','']));
+  lines.push(csvRow(['時間','類型','類別','項目名稱','金額（元）','經手人員','']));
+  if(allEntries.length){
+    allEntries.forEach(function(e){
+      lines.push(csvRow([e.time, e.type==='in'?'收入':'支出', e.cat||'－', e.name, e.amt, e.person,'']));
+    });
+  } else {
+    lines.push(csvRow(['（本期無收支紀錄）','','','','','','']));
+  }
+  lines.push(csvRow(['','','','','','','']));
+
+  var n = getAllNet();
+  lines.push(csvRow(['【收支小計】','','','','','','']));
+  lines.push(csvRow(['項目','金額（元）','','','','','']));
+  lines.push(csvRow(['總收入', n.inSum,'','','','','']));
+  lines.push(csvRow(['支出－貨款', n.貨款,'','','','','']));
+  lines.push(csvRow(['支出－雜支', n.雜支,'','','','','']));
+  lines.push(csvRow(['支出－其他', n.其他,'','','','','']));
+  lines.push(csvRow(['總支出', n.outSum,'','','','','']));
+  lines.push(csvRow(['淨額（收入－支出）', n.inSum-n.outSum,'','','','','']));
+  lines.push(csvRow(['預估收銀機應有現金', initialBalance+(n.inSum-n.outSum), '底金＋淨額','','','','']));
+  lines.push(csvRow(['','','','','','','']));
+
+  lines.push(csvRow(['【班別交接紀錄】','','','','','','']));
+  lines.push(csvRow(['時間','關卡','交接項目','經手人員','實際清點金額','系統應有金額','差額備註']));
+  if(handoverHistory.length){
+    handoverHistory.slice().reverse().forEach(function(h){
+      lines.push(csvRow([h.time,'關卡'+h.gate, h.label, h.person, h.cashTotal, h.expected, h.note||'無']));
+    });
+  } else {
+    lines.push(csvRow(['（尚無交接紀錄）','','','','','','']));
+  }
+
+  var bom = '\uFEFF';
+  var csv = bom + lines.join('\n');
+  var blob = new Blob([csv], {type:'text/csv;charset=utf-8'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = '店面日報_' + dateVal + '.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// 初始化
+renderGate();
+renderEntries();
+updateSystemCalc();
+document.getElementById('base-display').textContent = fmt(prevBalance);
+</script>
+</body>
+</html>
